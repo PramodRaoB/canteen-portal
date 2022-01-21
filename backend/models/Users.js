@@ -9,12 +9,22 @@ const UserSchema = new Schema({
 	},
 	email: {
 		type: String,
+		unique: true,
 		required: true
 	},
-	date:{
-		type: Date,
-		required: false
+	password: {
+		type: String,
+		required: true
+	},
+	contact: {
+		type: String,
+		required: true
+	},
+	type: {
+		type: String,
+		enum: ['buyer', 'vendor'],
+		required: true
 	}
 });
 
-module.exports = User = mongoose.model("Users", UserSchema);
+module.exports = User = mongoose.model("User", UserSchema);
