@@ -54,32 +54,65 @@ router.post("/register", async (req, res) => {
             User.findOne({email:newUser.email})
                 .then(async (savedUser)=>{
                     if(savedUser){
-                        return res.status(422).json({error:"User already exists with that email"})
+                        return res.status(422).json({
+                            status: 1,
+                            error:"User already exists with that email"
+                        })
                     }
                     newUser.password = retHash;
                     newUser.save()
                         .then((user)=>{
                             console.log(user.email)
                             console.log(user.password)
-                            res.json({message:"Saved Successfully"})
+                            typeUser.save()
+                                .then((user)=>{
+                                    res.json({
+                                        status: 0,
+                                        message:"Type Saved Successfully"
+                                    })
+                                    console.log(user.email)
+                                })
+                                .catch(async (err)=>{
+                                    console.log(err)
+                                    res.json({
+                                        status: 1,
+                                        error: "Error registering user"
+                                    })
+                                    User.deleteOne({email: newUser.email})
+                                        .then(() => {
+                                            console.log("Deleted successfully")
+                                        })
+                                        .catch(() => {
+                                            console.log("Error while deleting")
+                                        })
+                                })
                         })
-                        .catch((err)=>{
+                        .catch(async (err)=>{
                             console.log(err)
+                            res.json({
+                                status: 1,
+                                error: "Error registering user"
+                            })
+                            await newUser.remove()
                         })
-                    typeUser.save()
-                        .then((user)=>{
-                            res.json({message:"Type Saved Successfully"})
-                            console.log(user.email)
-                        })
-                        .catch((err)=>{
-                            console.log(err)
-                        })
+
                 })
-                .catch((err)=>{
+                .catch(async (err)=>{
                     console.log(err)
+                    res.json({
+                        status: 1,
+                        error: "Error registering user"
+                    })
                 })
 
-    })
+        })
+        .catch(async (err)=>{
+            console.log(err)
+            res.json({
+                status: 1,
+                error: "Error creating hash"
+            })
+        })
 });
 
 // POST request 
@@ -92,7 +125,7 @@ router.post("/login", (req, res) => {
     User.findOne({email: newUser.email})
         .then((retUser)=>{
             if(!retUser){
-                return res.status(422).json({error:"User with email does not exist!"})
+                return res.json({status: 1, error:"User with email does not exist!"})
             }
             bcrypt.compare(newUser.password, retUser.password)
                 .then(match =>{
@@ -101,13 +134,14 @@ router.post("/login", (req, res) => {
                             email: newUser.email,
                             type: newUser.type
                         }, JWT_SECRET);
-                        return res.json({token: token})
+                        return res.json({status: 0, token: token})
                     }
-                    else return res.status(422).json({error:"Invalid email or password"})
+                    return res.json({status: 1, error:"Invalid password"})
 
                 })
                 .catch((err)=>{
                     console.log(err)
+                    return res.json({status: 1, error: err})
                 })
     })
 });

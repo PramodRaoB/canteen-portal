@@ -1,72 +1,216 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 import axios from "axios";
-import Grid from "@mui/material/Grid";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 
-const Register = (props) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [date, setDate] = useState(null);
+import {
+    Form,
+    Input,
+    Button,
+    Select,
+    TimePicker,
+} from 'antd'
+import { Container } from "@mui/material"
+import {useNavigate} from "react-router-dom";
+const { Option } = Select;
 
-  const onChangeUsername = (event) => {
-    setName(event.target.value);
-  };
+axios.defaults.baseURL = "http://localhost:4000/api"
+const RegistrationForm = () => {
+    const [userType, setuserType] = useState('buyer')
+    const [form] = Form.useForm();
+    const navigate = useNavigate();
+    const format = 'HH:mm';
+    function handleChange(value) {
+        console.log(`selected ${value}`);
+        setuserType(value);
+        console.log(userType)
+    }
 
-  const onChangeEmail = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const resetInputs = () => {
-    setName("");
-    setEmail("");
-    setDate(null);
-  };
-
-  const onSubmit = (event) => {
-    event.preventDefault();
-
-    const newUser = {
-      name: name,
-      email: email,
-      date: Date.now(),
+    const onFinish = (values) => {
+        console.log('Received values of form: ', values);
+        axios.post("auth/register", values)
+            .then((res) => {
+                if (res.data.status === 1) {
+                    console.log(res.data.error);
+                }
+                else navigate("/login");
+            })
     };
 
-    axios
-      .post("http://localhost:4000/user/register", newUser)
-      .then((response) => {
-        alert("Created\t" + response.data.name);
-        console.log(response.data);
-      });
+    return (
+        <Container align="center" maxWidth="sm">
+        <Form
+            form={form}
+            name="register"
+            onFinish={onFinish}
+            scrollToFirstError
+        >
+            <Form.Item
+                name="name"
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please input your full name!',
+                    },
+                ]}
+            >
+                <Input placeholder={"Full name"}/>
+            </Form.Item>
+            <Form.Item
+                name="email"
+                rules={[
+                    {
+                        type: 'email',
+                        message: 'The input is not valid E-mail!',
+                    },
+                    {
+                        required: true,
+                        message: 'Please input your E-mail!',
+                    },
+                ]}
+            >
+                <Input placeholder={"Email address"}/>
+            </Form.Item>
 
-    resetInputs();
-  };
+            <Form.Item
+                name="password"
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please input your password!',
+                    },
+                    {
+                        min: 8,
+                        message: "Password must have at least 8 characters"
+                    }
+                ]}
+                hasFeedback
+            >
+                <Input.Password
+                type={"password"}
+                placeholder={"Password"}/>
+            </Form.Item>
 
-  return (
-    <Grid container align={"center"} spacing={2}>
-      <Grid item xs={12}>
-        <TextField
-          label="Name"
-          variant="outlined"
-          value={name}
-          onChange={onChangeUsername}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Email"
-          variant="outlined"
-          value={email}
-          onChange={onChangeEmail}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Button variant="contained" onClick={onSubmit}>
-          Register
-        </Button>
-      </Grid>
-    </Grid>
-  );
+            <Form.Item
+                name="confirm"
+                dependencies={['password']}
+                hasFeedback
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please confirm your password!',
+                    },
+                    ({ getFieldValue }) => ({
+                        validator(_, value) {
+                            if (!value || getFieldValue('password') === value) {
+                                return Promise.resolve();
+                            }
+
+                            return Promise.reject(new Error('The two passwords that you entered do not match!'));
+                        },
+                    }),
+                ]}
+            >
+                <Input.Password
+                type={"password"}
+                placeholder={"Confirm password"}/>
+            </Form.Item>
+
+
+            <Form.Item
+                name="contact"
+                rules={[
+                    {
+                        required: true,
+                        message: 'Please input your phone number!',
+                    },
+                    {
+                        len: 10, pattern: "^[0-9]*$",
+                        message: "Enter a valid phone number"
+                    }
+                ]}
+            >
+                <Input
+                    placeholder={"Phone number"}
+                />
+            </Form.Item>
+
+            <Form.Item
+            name={"type"}>
+                <Select onChange={handleChange} defaultValue={"buyer"}>
+                    <Option value="buyer">Buyer</Option>
+                    <Option value="vendor">Vendor</Option>
+                </Select>
+            </Form.Item>
+            {
+                userType === "buyer" &&
+                <>
+                    <Form.Item
+                        name="age"
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please input your age"
+                            },
+                            {
+                                pattern: "^[1-9][0-9]$",
+                                message: "Please enter a valid age"
+                            }
+                        ]}
+                    >
+                        <Input
+                        placeholder={"Age"}/>
+                    </Form.Item>
+                    <Form.Item
+                        name={"batch"}>
+                        <Select defaultValue={"UG1"}>
+                            <Option value="UG1">UG1</Option>
+                            <Option value="UG2">UG2</Option>
+                            <Option value="UG3">UG3</Option>
+                            <Option value="UG4">UG4</Option>
+                            <Option value="UG5">UG5</Option>
+                        </Select>
+                    </Form.Item>
+                </>
+            }
+            {
+               userType === "vendor" &&
+               <>
+                   <Form.Item name={"shop"} rules={[
+                       {
+                           required: true,
+                           message: "Please input the shop name!"
+                       }
+                   ]}>
+                       <Input placeholder={"Shop name"} />
+                   </Form.Item>
+                   <Form.Item name={"opening"} rules={[
+                       {
+                           required: true,
+                           message: "Please input the opening time of the shop"
+                       }
+                   ]}>
+                   <TimePicker format={format} placeholder={"Opening time"}/>
+                   </Form.Item>
+                   <Form.Item name={"closing"} rules={[
+                       {
+                           required: true,
+                           message: "Please input the closing time of the shop"
+                       }
+                   ]}>
+                       <TimePicker format={format} placeholder={"Closing time"}/>
+                   </Form.Item>
+
+               </>
+            }
+
+
+            <Form.Item>
+                <Button type="primary" htmlType="submit">
+                    Register
+                </Button>
+            </Form.Item>
+        </Form>
+        </Container>
+    );
 };
 
-export default Register;
+export default RegistrationForm;

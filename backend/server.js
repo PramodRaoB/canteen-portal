@@ -8,8 +8,9 @@ const DB_NAME = "canteenPortal"
 
 
 // routes
-const AuthRouter = require("./routes/auth");
-const tokenAuth = require("./middleware/login")
+const authRouter = require("./routes/auth");
+const tokenAuth = require("./middleware/login");
+const productRouter = require("./routes/product");
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -26,8 +27,9 @@ mongoose.connection.once('open', function() {
 
 
 // setup API endpoints
-app.use("/api/auth", AuthRouter);
+app.use("/api/auth", authRouter);
 app.use(tokenAuth);
+app.use("/api/product", productRouter);
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);

@@ -16,6 +16,10 @@ const BuyerSchema = new Schema({
         type: String,
         enum: ['UG1', 'UG2', 'UG3', 'UG4', 'UG5'],
         required: true
+    },
+    wallet: {
+        type: Number,
+        default: 0
     }
 });
 
