@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import {AxiosGetUser, AxiosLogin} from "../../services/auth";
 import { message } from "antd";
 import {useEffect, useState} from "react";
+import {AxiosUpdateWallet} from "../../services/wallet";
 
 const Wallet = (() => {
     const navigate = useNavigate();
@@ -20,7 +21,16 @@ const Wallet = (() => {
         setUser(res);
     }, [])
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (values) => {
+        var res = await AxiosUpdateWallet(values);
+        console.log(res);
+        if (!res) message.error("Error updating wallet")
+        else if (res.status === 1) {
+            message.error(res.error);
+        }
+        else {
+            message.success(res.message);
+        }
     }
 
     return (
@@ -41,7 +51,6 @@ const Wallet = (() => {
                     </Button>
                 </Form.Item>
             </Form>
-            <Button>Add money</Button>
         </Container>
     )
 })

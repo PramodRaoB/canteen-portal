@@ -11,13 +11,14 @@ router.get("/", async (req, res) => {
 })
 
 router.post("/update", async (req, res) => {
-    if (!res.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"});
+    if (!req.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"});
+    console.log(req.body);
     var updateUser;
     const user = await Buyer.findOne({email: req.user.email});
     if (!user) return res.json({status: 1, error: "Error getting wallet"})
     try {
         updateUser = {
-            wallet: user.wallet + parseInt(req.body.wallet)
+            wallet: user.wallet + parseInt(req.body.amount)
         }
     }
     catch {

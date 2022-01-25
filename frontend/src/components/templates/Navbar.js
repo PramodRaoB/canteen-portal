@@ -16,12 +16,7 @@ const Navbar = () => {
   let [wallet, setWallet] = useState(null);
 
   useEffect(async () => {
-    var res = await AxiosGetUser();
-    setUser(res);
-  }, [navigate])
-
-  useEffect(async () => {
-    if (user.type === "buyer") {
+    if (user && user.type === "buyer") {
       var res = await AxiosGetWallet(user);
       if (res.status === 1) {
         message.error(res.error);
@@ -30,6 +25,11 @@ const Navbar = () => {
       }
     }
   })
+
+  useEffect(async () => {
+    var res = await AxiosGetUser();
+    setUser(res);
+  }, [navigate])
 
   const handleLogout = () => {
     try {
@@ -40,6 +40,7 @@ const Navbar = () => {
       message.error("Error logging out")
       return
     }
+    setUser(null)
     message.success("Successfully logged out")
     navigate("/")
   }
