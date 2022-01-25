@@ -11,6 +11,8 @@ const DB_NAME = "canteenPortal"
 const authRouter = require("./routes/auth");
 const tokenAuth = require("./middleware/login");
 const productRouter = require("./routes/product");
+const userRouter = require("./routes/user")
+const walletRouter = require("./routes/wallet")
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -18,9 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connection to MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/' + DB_NAME, { useNewUrlParser: true });
-// require("./models/Users")
-// require("./models/Buyer")
-// require("./models/Vendor")
 mongoose.connection.once('open', function() {
     console.log("MongoDB database connection established successfully !");
 })
@@ -30,6 +29,8 @@ mongoose.connection.once('open', function() {
 app.use("/api/auth", authRouter);
 app.use(tokenAuth);
 app.use("/api/product", productRouter);
+app.use("/api/user", userRouter);
+app.use("/api/wallet", walletRouter)
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);

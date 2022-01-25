@@ -7,7 +7,11 @@ import RegistrationForm from "./components/common/Register";
 import LoginForm from "./components/common/Login";
 import Navbar from "./components/templates/Navbar";
 import Profile from "./components/users/Profile";
+import Wallet from "./components/common/wallet";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
+import axios from 'axios'
+
+axios.defaults.baseURL = "http://localhost:4000/api"
 
 const Layout = () => {
     return (
@@ -30,6 +34,7 @@ function App() {
                     <Route path="register" element={<RegistrationForm/>}/>
                     <Route path="profile" element={<Profile/>}/>
                     <Route path={"login"} element={<LoginForm/>}/>
+                    <Route path={"wallet"} element={<Wallet />}/>
                 </Route>
             </Routes>
         </BrowserRouter>

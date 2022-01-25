@@ -129,10 +129,11 @@ router.post("/login", (req, res) => {
             }
             bcrypt.compare(newUser.password, retUser.password)
                 .then(match =>{
+                    console.log(match);
                     if (match) {
                         const token = jwt.sign({
-                            email: newUser.email,
-                            type: newUser.type
+                            email: retUser.email,
+                            type: retUser.type
                         }, JWT_SECRET);
                         return res.json({status: 0, token: token})
                     }

@@ -17,7 +17,8 @@ const ProductSchema = new Schema({
     },
     type: {
         type: String,
-        enum: ['Veg', 'Non-Veg']
+        enum: ['Veg', 'Non-Veg'],
+        required: true
     },
     addons: [{
         name: {

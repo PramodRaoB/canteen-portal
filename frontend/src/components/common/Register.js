@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import axios from "axios";
 
 import {
     Form,
     Input,
     Button,
     Select,
-    TimePicker,
+    TimePicker, message,
 } from 'antd'
 import { Container } from "@mui/material"
 import {useNavigate} from "react-router-dom";
+import {AxiosRegister} from "../../services/auth";
 const { Option } = Select;
 
-axios.defaults.baseURL = "http://localhost:4000/api"
 const RegistrationForm = () => {
     const [userType, setuserType] = useState('buyer')
     const [form] = Form.useForm();
@@ -24,15 +23,16 @@ const RegistrationForm = () => {
         console.log(userType)
     }
 
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         console.log('Received values of form: ', values);
-        axios.post("auth/register", values)
-            .then((res) => {
-                if (res.data.status === 1) {
-                    console.log(res.data.error);
-                }
-                else navigate("/login");
-            })
+        const res = await AxiosRegister(values)
+        if (res) {
+            if (res.status === 1) {
+                message.error(res.error)
+            }
+            else navigate("/dashboard")
+
+        }
     };
 
     return (

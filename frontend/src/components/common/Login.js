@@ -3,22 +3,26 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Container } from "@mui/material";
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
+import {AxiosLogin} from "../../services/auth";
+import { message } from "antd";
 
 const LoginForm = () => {
     const navigate = useNavigate();
-    const onFinish = (values) => {
+    const onFinish = async (values) => {
         console.log('Received values of form: ', values);
-        axios.post("/auth/login", values)
-            .then((res) => {
-                if (res.data.status === 1) {
-                    console.log(res.data.error)
-                }
-                else {
-                    window.localStorage.setItem('Authorization', 'Bearer ' + res.data.token);
-                    navigate("/dashboard")
-                    console.log("Successfully logged in")
-                }
-            })
+        const res = await AxiosLogin(values);
+        if (res) {
+            if (res.status === 1) {
+                message.error(res.error);
+            }
+            else {
+                window.localStorage.setItem('Authorization', 'Bearer ' + res.token);
+                // navigate("/dashboard")
+                navigate("/profile")
+                message.success("Successfully logged in")
+            }
+        }
+
     };
 
     return (

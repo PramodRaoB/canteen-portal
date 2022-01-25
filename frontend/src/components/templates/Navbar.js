@@ -4,39 +4,121 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import {useEffect, useState} from "react";
+import {AxiosGetUser} from "../../services/auth";
+import {AxiosGetWallet} from "../../services/wallet";
+import {message} from "antd";
+import axios from "axios";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  let [user, setUser] = useState(null);
+  let [wallet, setWallet] = useState(null);
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ cursor: "pointer" }}
-            onClick={() => navigate("/")}
-          >
-            Canteen Portal
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
-          <Button color="inherit" onClick={() => navigate("/users")}>
-            Users
-          </Button>
-          <Button color="inherit" onClick={() => navigate("/register")}>
-            Register
-          </Button>
-          <Button color="inherit" onClick={() => navigate("/login")}>
-            Login
-          </Button>
-          <Button color="inherit" onClick={() => navigate("/profile")}>
-            My Profile
-          </Button>
-        </Toolbar>
-      </AppBar>
-    </Box>
-  );
+  useEffect(async () => {
+    var res = await AxiosGetUser();
+    setUser(res);
+  }, [navigate])
+
+  useEffect(async () => {
+    if (user.type === "buyer") {
+      var res = await AxiosGetWallet(user);
+      if (res.status === 1) {
+        message.error(res.error);
+      } else {
+        setWallet(res.message)
+      }
+    }
+  })
+
+  const handleLogout = () => {
+    try {
+      window.localStorage.removeItem("Authorization")
+      delete axios.defaults.headers.common['Authorization'];
+    }
+    catch {
+      message.error("Error logging out")
+      return
+    }
+    message.success("Successfully logged out")
+    navigate("/")
+  }
+
+  if (!user) {
+    return (
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar>
+              <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate("/")}
+              >
+                Canteen Portal
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button color="inherit" onClick={() => navigate("/register")}>
+                Register
+              </Button>
+              <Button color="inherit" onClick={() => navigate("/login")}>
+                Login
+              </Button>
+            </Toolbar>
+          </AppBar>
+        </Box>
+    );
+  }
+  else if (user.type === "buyer") {
+    return (
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar>
+              <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate("/")}
+              >
+                Canteen Portal
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button color={"inherit"} onClick={() => navigate("/wallet")}>
+                Wallet: {wallet}
+              </Button>
+              <Button color="inherit" onClick={() => navigate("/profile")}>
+                My Profile
+              </Button>
+              <Button color={"inherit"} onClick={handleLogout}>
+                Logout
+              </Button>
+            </Toolbar>
+          </AppBar>
+        </Box>
+    );
+  }
+  else {
+    return (
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar>
+              <Typography
+                  variant="h6"
+                  component="div"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate("/")}
+              >
+                Canteen Portal
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button color="inherit" onClick={() => navigate("/profile")}>
+                My Profile
+              </Button>
+            </Toolbar>
+          </AppBar>
+        </Box>
+    );
+  }
 };
 
 export default Navbar;
