@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const {DateTime} = require('luxon')
 
 const User = require("../models/Users")
 const Buyer = require("../models/Buyer")
@@ -38,7 +39,7 @@ router.post("/register", async (req, res) => {
         typeUser = new Buyer({
             email: req.body.email,
             age: req.body.age,
-            batch: req.body.batch
+            batch: req.body.batch,
         });
     }
     else {
@@ -48,13 +49,15 @@ router.post("/register", async (req, res) => {
             opening: req.body.opening,
             closing: req.body.closing
         });
+        typeUser.opening = DateTime.fromISO(typeUser.opening).toLocaleString(DateTime.TIME_24_SIMPLE)
+        typeUser.closing = DateTime.fromISO(typeUser.closing).toLocaleString(DateTime.TIME_24_SIMPLE)
     }
     bcrypt.hash(newUser.password,12)
         .then((retHash)=>{
             User.findOne({email:newUser.email})
                 .then(async (savedUser)=>{
                     if(savedUser){
-                        return res.status(422).json({
+                        return res.json({
                             status: 1,
                             error:"User already exists with that email"
                         })

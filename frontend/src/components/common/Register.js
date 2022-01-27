@@ -182,7 +182,8 @@ const RegistrationForm = () => {
                    ]}>
                        <Input placeholder={"Shop name"} />
                    </Form.Item>
-                   <Form.Item name={"opening"} rules={[
+                   <Input.Group compact={true}>
+                       <Form.Item name={"opening"} rules={[
                        {
                            required: true,
                            message: "Please input the opening time of the shop"
@@ -197,7 +198,7 @@ const RegistrationForm = () => {
                        }
                    ]}>
                        <TimePicker format={format} placeholder={"Closing time"}/>
-                   </Form.Item>
+                   </Form.Item></Input.Group>
 
                </>
             }

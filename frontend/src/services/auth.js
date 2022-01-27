@@ -48,8 +48,6 @@ const AxiosGetUser = async () => {
             //
         }
     }
-    console.log("lmao")
-    console.log(res.data)
     return res.data;
 }
 

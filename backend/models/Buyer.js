@@ -20,7 +20,11 @@ const BuyerSchema = new Schema({
     wallet: {
         type: Number,
         default: 0
-    }
+    },
+    favourites: [{
+        type: Schema.Types.ObjectId,
+        ref: "Product"
+    }]
 });
 
 module.exports = Buyer = mongoose.model("Buyer", BuyerSchema);

@@ -84,6 +84,9 @@ const Navbar = () => {
                 Canteen Portal
               </Typography>
               <Box sx={{ flexGrow: 1 }} />
+              <Button color={"inherit"} onClick={() => navigate("/dashboard")}>
+                Dashboard
+              </Button>
               <Button color={"inherit"} onClick={() => navigate("/wallet")}>
                 Wallet: {wallet}
               </Button>
@@ -114,6 +117,9 @@ const Navbar = () => {
               <Box sx={{ flexGrow: 1 }} />
               <Button color="inherit" onClick={() => navigate("/profile")}>
                 My Profile
+              </Button>
+              <Button color={"inherit"} onClick={handleLogout}>
+                Logout
               </Button>
             </Toolbar>
           </AppBar>

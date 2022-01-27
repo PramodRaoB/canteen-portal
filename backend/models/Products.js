@@ -12,7 +12,18 @@ const ProductSchema = new Schema({
         required: true
     },
     rating: {
-        type: Number,
+        count: {
+            type: Number,
+            default: 0
+        },
+        total: {
+            type: Number,
+            default: 0
+        }
+    },
+    shop: {
+        type: Schema.Types.ObjectId,
+        ref: "Vendor",
         required: true
     },
     type: {

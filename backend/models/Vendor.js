@@ -20,7 +20,11 @@ const VendorSchema = new Schema({
     closing: {
         type: String,
         required: true
-    }
+    },
+    products: [{
+        type: Schema.Types.ObjectId,
+        ref: "Product"
+    }]
 });
 
 module.exports = Vendor = mongoose.model("Vendor", VendorSchema);

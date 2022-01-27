@@ -8,6 +8,7 @@ import LoginForm from "./components/common/Login";
 import Navbar from "./components/templates/Navbar";
 import Profile from "./components/users/Profile";
 import Wallet from "./components/common/wallet";
+import Dashboard from "./components/common/Dashboard";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import axios from 'axios'
 
@@ -35,6 +36,7 @@ function App() {
                     <Route path="profile" element={<Profile/>}/>
                     <Route path={"login"} element={<LoginForm/>}/>
                     <Route path={"wallet"} element={<Wallet />}/>
+                    <Route path={"dashboard"} element={<Dashboard />}/>
                 </Route>
             </Routes>
         </BrowserRouter>
