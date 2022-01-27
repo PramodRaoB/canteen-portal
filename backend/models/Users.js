@@ -24,7 +24,11 @@ const UserSchema = new Schema({
 		type: String,
 		enum: ['buyer', 'vendor'],
 		required: true
-	}
+	},
+	orders: [{
+		type: Schema.Types.ObjectId,
+		ref: "Order"
+	}]
 });
 
 module.exports = User = mongoose.model("User", UserSchema);

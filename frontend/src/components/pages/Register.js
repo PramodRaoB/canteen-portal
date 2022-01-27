@@ -30,7 +30,7 @@ const RegistrationForm = () => {
             if (res.status === 1) {
                 message.error(res.error)
             }
-            else navigate("/dashboard")
+            else navigate("/login")
 
         }
     };

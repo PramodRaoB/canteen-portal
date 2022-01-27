@@ -11,16 +11,8 @@ const AxiosGetProducts = async () => {
     return productList.data;
 }
 
-const AxiosGetFavourites = async () => {
-    const res = await axios.get("/product/favourite")
-    if (!res || res.data.status === 1) {
-        console.log(res.data.error);
-    }
-    return res;
-}
-
 const AxiosUpdateFavourite = async (id) => {
-    const res = await axios.post("/product/favourite", {_id: id})
+    const res = await axios.post("/product/favourite", {pid: id})
     if (!res || res.data.status === 1) console.log(res.data.error)
     return res.data
 }

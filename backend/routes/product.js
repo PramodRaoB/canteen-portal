@@ -98,9 +98,9 @@ router.post("/favourite", async (req, res) => {
     if (!req.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"})
     var buyer = await Buyer.findOne({email: req.user.email})
     if (!buyer) return res.json({status: 1, error: "User not found"})
-    var product = await Product.findById(req.body._id)
-    if (!product) res.json({status: 1, error: "Product not found!"})
-    var id = req.body._id
+    var product = await Product.findById(req.body.pid)
+    if (!product) return res.json({status: 1, error: "Product not found!"})
+    var id = req.body.pid
     const ind = buyer.favourites.findIndex((i) => (i == id))
     if (ind !== -1) buyer.favourites.splice(ind, 1)
     else buyer.favourites.push(id)

@@ -5,19 +5,26 @@ import {
     Col,
     Input,
     Switch,
-    message
+    message,
+    Modal, Form
 } from 'antd';
 import {useEffect, useState} from "react";
 import {AxiosGetProducts, AxiosUpdateFavourite} from "../../services/products";
 import {AxiosGetUser} from "../../services/auth";
+import {AxiosPlaceOrder} from "../../services/orders";
 import {useNavigate} from "react-router-dom";
 
-const Dashboard = () => {
+const BuyerDashboard = () => {
     const navigate = useNavigate();
+
+    const [buyForm] = Form.useForm()
+
     const [search, setSearch] = useState("");
     const [priceFilter, setPriceFilter] = useState("0#9007199254740991")
     const [vegFilter, setVegFilter] = useState(false)
     const [productList, setProductList] = useState({})
+    const [buyProduct, setBuyProduct] = useState({})
+    const [buyModal, setBuyModal] = useState(false)
     const [favouritesUpdated, setFavouritesUpdated] = useState(false)
     const [favouriteFilter, setFavouriteFilter] = useState(false);
 
@@ -50,6 +57,28 @@ const Dashboard = () => {
         else {
             message.success(res.message)
             setFavouritesUpdated(!favouritesUpdated)
+        }
+    }
+
+    const handleBuy = async (id) => {
+        var ind = productList.available.findIndex((p) => p._id === id)
+        if (ind === -1) {
+            message.error("Sorry, that product does not exist!")
+        }
+        else {
+            setBuyProduct(productList.available[ind])
+            setBuyModal(true)
+        }
+    }
+
+    const handleSubmit = async (values) => {
+        var req = values
+        req.pid = buyProduct._id
+        console.log("Request sent: ", req)
+        var res = await AxiosPlaceOrder(req)
+        if (!res || res.status === 1) message.error(res.error.toString())
+        else {
+            message.success(res.message)
         }
     }
 
@@ -151,8 +180,8 @@ const Dashboard = () => {
             key: 'action',
             render: (text, record) => (
                 <>
-                    <button type={"primary"}>Buy</button>
-                    <button onClick={() => handleFavourite(record._id)}>{getProductDetails(record._id).favourite ? "<3" : "</3"}</button>
+                    <button type={"primary"} onClick={() => handleBuy(record._id)}>Buy</button>
+                    <button onClick={() => handleFavourite(record._id)} type={"primary"}>{getProductDetails(record._id).favourite ? "<3" : "</3"}</button>
                 </>
             )
         }
@@ -180,8 +209,42 @@ const Dashboard = () => {
             <Table columns={columns} dataSource={favouriteFilter ? productList.afavourites : productList.available} bordered={true}/>
             Unavailable
             <Table columns={columns} dataSource={favouriteFilter ? productList.ufavourites : productList.unavailable} bordered={true}/>
+            <Modal
+                title={"Buy " + buyProduct.name}
+                visible = {buyModal}
+                onOk={() => {
+                    buyForm.validateFields()
+                        .then(values => {
+                            handleSubmit(values)
+                            buyForm.resetFields()
+                            setBuyModal(false)
+                        })
+                        .catch((err) => {
+                            console.error(err);
+                        })
+                }}
+                onCancel={() => {
+                    setBuyModal(false)
+                    buyForm.resetFields()
+                }}
+                >
+                <Form
+                    form={buyForm}
+                    layout={"vertical"}
+                    >
+                    <Form.Item
+                        name={"quantity"}
+                        rules={[
+                            {required: true, message: "Please enter the quantity"},
+                            {pattern: "^[0-9]*$", message: "Please enter a valid quantity"}
+                        ]}
+                        >
+                        <Input placeholder={"Quantity"} />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </>
     )
 }
 
-export default Dashboard;
+export default BuyerDashboard;

@@ -2,13 +2,13 @@ import {BrowserRouter, Outlet, Route, Routes} from "react-router-dom";
 import "./App.css";
 
 import UsersList from "./components/users/UsersList";
-import Home from "./components/common/Home";
-import RegistrationForm from "./components/common/Register";
-import LoginForm from "./components/common/Login";
+import Home from "./components/pages/Home";
+import RegistrationForm from "./components/pages/Register";
+import LoginForm from "./components/pages/Login";
 import Navbar from "./components/templates/Navbar";
-import Profile from "./components/users/Profile";
-import Wallet from "./components/common/wallet";
-import Dashboard from "./components/common/Dashboard";
+import Profile from "./components/pages/Profile";
+import Wallet from "./components/pages/Wallet";
+import BuyerDashboard from "./components/templates/buyerDashboard";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import axios from 'axios'
 
@@ -36,7 +36,7 @@ function App() {
                     <Route path="profile" element={<Profile/>}/>
                     <Route path={"login"} element={<LoginForm/>}/>
                     <Route path={"wallet"} element={<Wallet />}/>
-                    <Route path={"dashboard"} element={<Dashboard />}/>
+                    <Route path={"dashboard"} element={<BuyerDashboard />}/>
                 </Route>
             </Routes>
         </BrowserRouter>

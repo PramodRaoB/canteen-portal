@@ -13,6 +13,7 @@ const tokenAuth = require("./middleware/login");
 const productRouter = require("./routes/product");
 const userRouter = require("./routes/user")
 const walletRouter = require("./routes/wallet")
+const orderRouter = require("./routes/order")
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -31,6 +32,7 @@ app.use(tokenAuth);
 app.use("/api/product", productRouter);
 app.use("/api/user", userRouter);
 app.use("/api/wallet", walletRouter)
+app.use("/api/order", orderRouter)
 
 app.listen(PORT, function() {
     console.log("Server is running on Port: " + PORT);
