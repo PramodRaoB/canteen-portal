@@ -165,7 +165,7 @@ const Profile = () => {
                                 message: "Please input the shop name!"
                             }
                         ]}>
-                            <Input placeholder={"Shop name"} disabled={!Edit}/>
+                            <Input placeholder={"Shop name"} disabled={true}/>
                         </Form.Item>
                         <Form.Item name={"opening"} rules={[
                             {

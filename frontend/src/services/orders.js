@@ -44,4 +44,34 @@ const AxiosOrderProgress = async (val) => {
     return res.data
 }
 
-export {AxiosPlaceOrder, AxiosGetOrders, AxiosPickUp, AxiosRateOrder, AxiosOrderReject, AxiosOrderAccept, AxiosOrderProgress}
+const AxiosGetProductStats = async () => {
+    var res = await axios.get("/order/stats")
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+const AxiosGetAgeStats = async () => {
+    var res = await axios.get("/order/agestats")
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+
+const AxiosGetBatchStats = async () => {
+    var res = await axios.get("/order/batchstats")
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+export {
+    AxiosPlaceOrder,
+    AxiosGetOrders,
+    AxiosPickUp,
+    AxiosRateOrder,
+    AxiosOrderReject,
+    AxiosOrderAccept,
+    AxiosOrderProgress,
+    AxiosGetProductStats,
+    AxiosGetAgeStats,
+    AxiosGetBatchStats
+}

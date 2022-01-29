@@ -25,6 +25,7 @@ import {AxiosGetProducts, AxiosUpdateFavourite} from "../../services/products";
 import {AxiosGetUser} from "../../services/auth";
 import {AxiosPlaceOrder} from "../../services/orders";
 import {useNavigate} from "react-router-dom";
+import fuzzy from "fuzzy";
 
 const BuyerDashboard = () => {
     const navigate = useNavigate();
@@ -39,6 +40,12 @@ const BuyerDashboard = () => {
     const [buyModal, setBuyModal] = useState(false)
     const [favouritesUpdated, setFavouritesUpdated] = useState(false)
     const [favouriteFilter, setFavouriteFilter] = useState(false);
+
+    const [allVendors, setAllVendors] = useState([])
+    const [vendorFilter, setVendorFilter] = useState([])
+
+    const [allTags, setAllTags] = useState([])
+    const [tagFilter, setTagFilter] = useState([])
 
     const handleSearch = (values) => {
         setSearch(values.target.value)
@@ -119,13 +126,44 @@ const BuyerDashboard = () => {
     useEffect(async () => {
         var res = await AxiosGetProducts();
         if (!res) message.error("Error fetching product list")
-        else if (res.status === 1) message.error(res.error.toString())
+        else if (res.status === 1) {
+            //
+        }
         else {
             setProductList(res.message)
+
+            var tempV = [], tempT = []
+            res.message.available.forEach((p) => {
+                tempV.push(p.shop.shop)
+                p.tags.forEach((v) => {
+                    tempT.push(v.toUpperCase())
+                })
+            })
+            res.message.unavailable.forEach((p) => {
+                tempV.push(p.shop.shop)
+                p.tags.forEach((v) => {
+                    tempT.push(v)
+                })
+            })
+            var setV = new Set(tempV)
+            var setT = new Set(tempT)
+            var tempV_ = [], tempT_ = []
+            setV.forEach((p) => {
+                tempV_.push({value: p, text: p})
+            })
+            setT.forEach((p) => {
+                tempT_.push({value: p, text: p})
+            })
+            setAllVendors(tempV_)
+            setAllTags(tempT_)
             message.success("Bon appetit!")
         }
-        console.log(res)
     }, [favouritesUpdated])
+
+    const handleChange = (pagination, filters, sorter) => {
+        setTagFilter(filters.tags)
+        setVendorFilter(filters.shop)
+    };
 
     const columns = [
         {
@@ -133,7 +171,11 @@ const BuyerDashboard = () => {
             dataIndex: 'name',
             key: 'name',
             filteredValue: [search],
-            onFilter: (value, record) => value ? record.name.toLowerCase().includes(value.toLowerCase()) : true,
+            onFilter: (value, record) => {
+                var results = fuzzy.filter(value, [record.name])
+                var matches = results.map(function(el) { return el.string; });
+                return matches.length === 1
+            },
             sorter: (a, b) => a.name < b.name,
             align: "center"
         },
@@ -180,12 +222,22 @@ const BuyerDashboard = () => {
                     })}
                 </>
             ),
+            onFilter: (value, record) => {
+                return record.tags.includes(value)
+            },
+            filters: allTags,
+            filteredValue: tagFilter,
             align: "center"
         },
         {
             title: 'Vendor',
             key: 'shop',
-            render: record => record.shop.shop
+            render: record => record.shop.shop,
+            onFilter: (value, record) => {
+                return record.shop.shop === value
+            },
+            filters: allVendors,
+            filteredValue: vendorFilter
         },
         {
             title: 'Action',
@@ -219,7 +271,7 @@ const BuyerDashboard = () => {
             <Typography variant={"h3"} component={"div"} align={"center"} gutterBottom={true}>DASHBOARD</Typography>
             <Row>
                 <Col span={5}>
-                    <Input.Search onChange={handleSearch} placeholder={"Search"} />
+                    <Input.Search onChange={handleSearch} placeholder={"Fuzzy search"} />
                 </Col>
                 <Col span={5}>
                     <Input.Group compact={true}>
@@ -234,9 +286,9 @@ const BuyerDashboard = () => {
                     <Switch onChange={handleFavouriteFilter} checkedChildren={"Favourites"} unCheckedChildren={"Any"} />
                 </Col>
             </Row>
-            <Table columns={columns} dataSource={favouriteFilter ? productList.afavourites : productList.available} bordered={true}/>
+            <Table columns={columns} onChange={handleChange} dataSource={favouriteFilter ? productList.afavourites : productList.available} bordered={true}/>
             <Typography variant={"h6"} component={"div"} align={"center"}>Unavailable</Typography>
-            <Table columns={columns} dataSource={favouriteFilter ? productList.ufavourites : productList.unavailable} bordered={true}/>
+            <Table columns={columns}  onChange={handleChange} dataSource={favouriteFilter ? productList.ufavourites : productList.unavailable} bordered={true}/>
             <Modal
                 title={"Buy " + buyProduct.name}
                 visible = {buyModal}

@@ -18,7 +18,8 @@ const OrderSchema = new Schema({
     item: {
         name: {type: String, required: true},
         price: {type: Number, required: true},
-        pid: {type: Schema.Types.ObjectId, ref: "Product", required: true}
+        // pid: {type: Schema.Types.ObjectId, ref: "Product", required: true}
+        pid: {type: String, required: true}
     },
     status: {
         type: String,

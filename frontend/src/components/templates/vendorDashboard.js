@@ -19,6 +19,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import fuzzy from 'fuzzy'
 
 import {useEffect, useState} from "react";
 import {
@@ -117,7 +118,11 @@ const VendorDashboard = () => {
             dataIndex: 'name',
             key: 'name',
             filteredValue: [search],
-            onFilter: (value, record) => value ? record.name.toLowerCase().includes(value.toLowerCase()) : true,
+            onFilter: (value, record) => {
+                var results = fuzzy.filter(value, [record.name])
+                var matches = results.map(function(el) { return el.string; });
+                return matches.length === 1
+            },
             sorter: (a, b) => a.name < b.name,
             align: "center"
         },
@@ -199,7 +204,7 @@ const VendorDashboard = () => {
                     <Button type={"primary"} onClick={() => setAddVisible(true)}>Add product</Button>
                 </Col>
                 <Col span={5}>
-                    <Input.Search onChange={handleSearch} placeholder={"Search"} />
+                    <Input.Search onChange={handleSearch} placeholder={"Fuzzy search"} />
                 </Col>
                 <Col span={5}>
                     <Input.Group compact={true}>

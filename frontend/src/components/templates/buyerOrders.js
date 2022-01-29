@@ -30,7 +30,9 @@ const BuyerOrders = () => {
 
     const updateOrders = async () => {
         var res = await AxiosGetOrders();
-        if (!res || res.status === 1) message.error(res.error.toString())
+        if (!res || res.status === 1) {
+            // message.error(res.error.toString())
+        }
         else {
             setOrderList(res.message)
         }

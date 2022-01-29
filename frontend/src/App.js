@@ -10,6 +10,7 @@ import Profile from "./components/pages/Profile";
 import Wallet from "./components/pages/Wallet";
 import Dashboard from "./components/pages/Dashboard";
 import Orders from "./components/pages/Orders";
+import Stats from "./components/pages/Statistics";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import axios from 'axios'
 
@@ -39,6 +40,7 @@ function App() {
                     <Route path={"wallet"} element={<Wallet />}/>
                     <Route path={"dashboard"} element={<Dashboard />}/>
                     <Route path={"orders"} element={<Orders />} />
+                    <Route path={"statistics"} element={<Stats />} />
                 </Route>
             </Routes>
         </BrowserRouter>

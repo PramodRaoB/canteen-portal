@@ -198,4 +198,91 @@ router.post("/rate", async (req, res) => {
     })
 })
 
+router.get("/stats", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    const vendor = await Vendor.findOne({email: req.user.email}).populate('products')
+    if (!vendor) return res.json({status: 1, error: "User not found"})
+    const user = await User.findOne({email: req.user.email}).populate('orders')
+    if (!user) return res.json({status: 1, error: "User not found"})
+
+    let pCnt = []
+    for (const i in vendor.products) {
+        let product = vendor.products[i]
+        let temp = 0
+        for (const j in user.orders) {
+            let order = user.orders[j]
+            if (order.item.pid == product._id)
+                temp++
+        }
+        pCnt.push({name: product.name, count: temp})
+    }
+    pCnt.sort((a, b) => b.count - a.count)
+    let completed = 0, placed = 0, pending = 0
+    for (const i in user.orders) {
+        let order = user.orders[i]
+        if (order.status === 'COMPLETED') completed++
+        if (order.status === 'PLACED' || order.status === 'ACCEPTED' || order.status === 'COOKING') pending++
+        placed++
+    }
+    var retArr = pCnt.slice(0, 5)
+    while (retArr.length < 5) retArr.push({name: "Your next big success!", count: ":D"})
+    return res.json({status: 0, message: {topOrders: retArr, placed: placed, completed: completed, pending: pending}})
+})
+
+router.get("/agestats", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    const vendor = await Vendor.findOne({email: req.user.email}).populate('products')
+    if (!vendor) return res.json({status: 1, error: "User not found"})
+    const user = await User.findOne({email: req.user.email}).populate('orders')
+    if (!user) return res.json({status: 1, error: "User not found"})
+
+    var ages = {}
+    const allBuyers = await Buyer.find({})
+    for (const i in allBuyers) {
+        let buyer = allBuyers[i]
+        const user_ = await User.findOne({email: buyer.email}).populate('orders')
+        if (!ages[buyer.age])
+            ages[buyer.age] = 0
+        for (const j in user_.orders) {
+            if (user_.orders[j].vendor === vendor.shop && user_.orders[j].status === 'COMPLETED')
+                ages[buyer.age]++
+        }
+    }
+
+    var labels = [], data = []
+
+    for (const [key, value] of Object.entries(ages)) {
+        labels.push(key)
+        data.push(value)
+    }
+    return res.json({status: 0, message: {labels: labels, data: data}})
+})
+
+router.get("/batchstats", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    const vendor = await Vendor.findOne({email: req.user.email}).populate('products')
+    if (!vendor) return res.json({status: 1, error: "User not found"})
+    const user = await User.findOne({email: req.user.email}).populate('orders')
+    if (!user) return res.json({status: 1, error: "User not found"})
+
+    var batches = ['UG1', 'UG2', 'UG3', 'UG4', 'UG5']
+    var test = {}
+    var users = await Buyer.find({})
+    for (const i in users) {
+        var user_ = await User.findOne({email: users[i].email}).populate('orders')
+        if (!test[users[i].batch])
+            test[users[i].batch] = 0
+        for (const j in user_.orders) {
+            if (user_.orders[j].vendor === vendor.shop && user_.orders[j].status === 'COMPLETED')
+                test[users[i].batch]++
+        }
+    }
+    var retArr = []
+    for (const i in batches) {
+        if (!test[batches[i]]) test[batches[i]] = 0
+        retArr.push(test[batches[i]])
+    }
+    return res.json({status: 0, message: retArr})
+})
+
 module.exports = router

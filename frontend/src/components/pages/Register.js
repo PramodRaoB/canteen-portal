@@ -25,6 +25,8 @@ const RegistrationForm = () => {
 
     const onFinish = async (values) => {
         console.log('Received values of form: ', values);
+        if (!values.type) values.type = 'buyer'
+        if (!values.batch) values.batch = "UG1"
         const res = await AxiosRegister(values)
         if (res) {
             if (res.status === 1) {
