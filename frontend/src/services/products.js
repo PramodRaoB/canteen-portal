@@ -17,4 +17,28 @@ const AxiosUpdateFavourite = async (id) => {
     return res.data
 }
 
-export {AxiosGetProducts, AxiosUpdateFavourite}
+const AxiosGetMyProducts = async () => {
+    const res = await axios.get("/product/my")
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+const AxiosDeleteProduct = async (val) => {
+    const res = await axios.post("/product/delete", val)
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+const AxiosUpdateProduct = async (val) => {
+    const res = await axios.post("/product/update", val)
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+const AxiosAddProduct = async (val) => {
+    const res = await axios.post("/product/add", val)
+    if (!res || res.data.status === 1) console.log(res.data.error)
+    return res.data
+}
+
+export {AxiosGetProducts, AxiosUpdateFavourite, AxiosGetMyProducts, AxiosDeleteProduct, AxiosUpdateProduct, AxiosAddProduct}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     Form,
@@ -9,7 +9,7 @@ import {
 } from 'antd'
 import { Container } from "@mui/material"
 import {useNavigate} from "react-router-dom";
-import {AxiosRegister} from "../../services/auth";
+import {AxiosGetUser, AxiosRegister} from "../../services/auth";
 const { Option } = Select;
 
 const RegistrationForm = () => {
@@ -34,6 +34,14 @@ const RegistrationForm = () => {
 
         }
     };
+
+    useEffect(async () => {
+        var res = await AxiosGetUser();
+        if (res) {
+            message.warning("User already registered")
+            navigate("/profile")
+        }
+    }, [navigate])
 
     return (
         <Container align="center" maxWidth="sm">

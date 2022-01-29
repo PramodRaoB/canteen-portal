@@ -6,8 +6,20 @@ import {
     Input,
     Switch,
     message,
-    Modal, Form
+    Modal, Form, Button, Space
 } from 'antd';
+import {
+    Favorite,
+    FavoriteBorderOutlined
+} from "@mui/icons-material";
+import {
+    Typography
+} from "@mui/material";
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 import {useEffect, useState} from "react";
 import {AxiosGetProducts, AxiosUpdateFavourite} from "../../services/products";
 import {AxiosGetUser} from "../../services/auth";
@@ -178,17 +190,33 @@ const BuyerDashboard = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (text, record) => (
-                <>
-                    <button type={"primary"} onClick={() => handleBuy(record._id)}>Buy</button>
-                    <button onClick={() => handleFavourite(record._id)} type={"primary"}>{getProductDetails(record._id).favourite ? "<3" : "</3"}</button>
-                </>
-            )
+            render: (text, record) => {
+                if (productList.available.findIndex((p) => (p._id === record._id)) !== -1)
+                    return (
+                    <>
+                        <Space>
+                        <Button type={"primary"} onClick={() => handleBuy(record._id)}>Buy</Button>
+                        <Button onClick={() => handleFavourite(record._id)} type={"primary"}>{getProductDetails(record._id).favourite ? <Favorite /> : <FavoriteBorderOutlined />}</Button>
+                        </Space>
+                    </>
+                    )
+                else {
+                    return (
+                        <>
+                            <Space>
+                                <Button type={"primary"} disabled={true}>Buy</Button>
+                                <Button onClick={() => handleFavourite(record._id)} type={"primary"}>{getProductDetails(record._id).favourite ? <Favorite /> : <FavoriteBorderOutlined />}</Button>
+                            </Space>
+                        </>
+                    )
+                }
+            }
         }
     ];
 
     return (
         <>
+            <Typography variant={"h3"} component={"div"} align={"center"} gutterBottom={true}>DASHBOARD</Typography>
             <Row>
                 <Col span={5}>
                     <Input.Search onChange={handleSearch} placeholder={"Search"} />
@@ -207,7 +235,7 @@ const BuyerDashboard = () => {
                 </Col>
             </Row>
             <Table columns={columns} dataSource={favouriteFilter ? productList.afavourites : productList.available} bordered={true}/>
-            Unavailable
+            <Typography variant={"h6"} component={"div"} align={"center"}>Unavailable</Typography>
             <Table columns={columns} dataSource={favouriteFilter ? productList.ufavourites : productList.unavailable} bordered={true}/>
             <Modal
                 title={"Buy " + buyProduct.name}
@@ -218,6 +246,7 @@ const BuyerDashboard = () => {
                             handleSubmit(values)
                             buyForm.resetFields()
                             setBuyModal(false)
+                            navigate("/dashboard")
                         })
                         .catch((err) => {
                             console.error(err);

@@ -62,12 +62,13 @@ router.post("/add", async (req, res) => {
     let newProduct = new Product({
         name: req.body.name,
         price: req.body.price,
-        rating: req.body.rating,
         shop: vendor._id,
         type: req.body.type,
-        addons: req.body.addons,
+        // addons: req.body.addons,
         tags: req.body.tags
     })
+    if (newProduct.type === "false") newProduct.type = "Veg"
+    else if (newProduct.type === "true") newProduct.type = "Non-Veg"
     newProduct.save()
         .then((product) => {
             vendor.products.push(product._id);
@@ -85,6 +86,38 @@ router.post("/add", async (req, res) => {
                 error: "Error adding product"
             })
         })
+})
+
+router.post("/update", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    if (req.body.type === true) req.body.type = "Non-Veg"
+    else if (req.body.type === false) req.body.type = "Veg"
+    console.log(req.body)
+    Product.updateOne({_id: req.body.pid}, req.body, (err, doc) => {
+        if (err) return res.json({status: 1, error: err})
+        return res.json({status: 0, message: "Product updated successfully"})
+    })
+})
+
+router.post("/delete", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    var vendor = await Vendor.findOne({email: req.user.email})
+    if (!vendor) return res.json({status: 1, error: "User not found"})
+    console.log(vendor)
+    var ind = vendor.products.findIndex((p) => (p == req.body.pid))
+    if (ind !== -1) {
+        vendor.products.splice(ind, 1)
+        Product.deleteOne({_id: req.body.pid}, (err, doc) => {
+            if (err) {
+                vendor.products.push(req.body.pid)
+                return res.json({status: 1, error: err})
+            }
+            vendor.save(err => {
+                if (err) return res.json({status: 1, error: err})
+                return res.json({status: 0, message: "Product successfully deleted"})
+            })
+        })
+    }
 })
 
 router.get("/favourite", async (req, res) => {
@@ -109,6 +142,18 @@ router.post("/favourite", async (req, res) => {
         if (err) return res.json({status: 1, error: err})
         return res.json({status: 0, message: "Favourite updated!"})
     })
+})
+
+router.get("/my", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    var vendor = await Vendor.findOne({email: req.user.email}).populate('products')
+    if (!vendor) return res.json({status: 1, error: "User not found"})
+    vendor.products.forEach((p) => {
+        if (p.type === "Veg") p.type = false
+        else p.type = true;
+    })
+    console.log("sending", vendor.products)
+    return res.json({status: 0, message: vendor.products})
 })
 
 module.exports = router

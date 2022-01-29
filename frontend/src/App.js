@@ -8,7 +8,8 @@ import LoginForm from "./components/pages/Login";
 import Navbar from "./components/templates/Navbar";
 import Profile from "./components/pages/Profile";
 import Wallet from "./components/pages/Wallet";
-import BuyerDashboard from "./components/templates/buyerDashboard";
+import Dashboard from "./components/pages/Dashboard";
+import Orders from "./components/pages/Orders";
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import axios from 'axios'
 
@@ -36,7 +37,8 @@ function App() {
                     <Route path="profile" element={<Profile/>}/>
                     <Route path={"login"} element={<LoginForm/>}/>
                     <Route path={"wallet"} element={<Wallet />}/>
-                    <Route path={"dashboard"} element={<BuyerDashboard />}/>
+                    <Route path={"dashboard"} element={<Dashboard />}/>
+                    <Route path={"orders"} element={<Orders />} />
                 </Route>
             </Routes>
         </BrowserRouter>

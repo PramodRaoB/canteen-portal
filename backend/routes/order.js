@@ -12,6 +12,14 @@ const {DateTime} = require("luxon");
 
 JWT_SECRET = require("../utils/keys")
 
+router.get("/", async (req, res) => {
+    if (!req.user) return res.json({status: 1, error: "Unauthorized"})
+    var user = await User.findOne({email: req.user.email}).populate('orders');
+    if (!user) return res.json({status: 1, error: "User not found"})
+    // user.populate('orders')
+    return res.json({status: 0, message: user.orders})
+})
+
 router.post("/new", async (req, res) => {
     if (!req.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"})
     var product = await Product.findById(req.body.pid)
@@ -46,7 +54,8 @@ router.post("/new", async (req, res) => {
         vendor: vendor.shop,
         item: {
             name: product.name,
-            price: product.price
+            price: product.price,
+            pid: product._id
         },
         quantity: quantity,
         total: total
@@ -64,6 +73,129 @@ router.post("/new", async (req, res) => {
         .catch(err => {
             return res.json({status: 1, error: err})
         })
+})
+
+router.post("/pickup", async (req, res) => {
+    if (!req.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"})
+    var id = req.body.pid
+    var order = await Order.findById(id)
+    if (!order) return res.json({status: 1, error: "Order does not exist"})
+    var buyer = await User.findOne({email: req.user.email}).populate('orders')
+    if (!buyer) return res.json({status: 1, error: "User does not exist"})
+    if (buyer.orders.findIndex((p) => (p._id == id)) === -1) return res.json({status: 1, error: "Order does not exist"})
+
+    if (order.status !== 'READY FOR PICKUP') return res.json({status: 1, error: "Order not ready to be picked up"})
+
+    order.status = "COMPLETED"
+    order.save((err) => {
+        if (err) return res.json({status: 1, error: err})
+        return res.json({status: 0, message: "Order successfully picked up!"})
+    })
+})
+
+router.post("/progress", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    var id = req.body.pid;
+    var order = await Order.findById(id)
+    if (!order) return res.json({status: 1, error: "Order does not exist"})
+    var vendor = await User.findOne({email: req.user.email}).populate('orders')
+    if (!vendor) return res.json({status: 1, error: "User does not exist"})
+    if (vendor.orders.findIndex((p) => (p._id == id)) === -1) return res.json({status: 1, error: "Order does not exist"})
+    var newStatus
+
+    if (order.status === 'ACCEPTED') newStatus = 'COOKING'
+    else if (order.status === 'COOKING') newStatus = 'READY FOR PICKUP'
+    else return res.json({status: 1, error: "Not applicable"})
+
+    order.status = newStatus
+
+    order.save((err) => {
+        if (err) return res.json({status: 1, error: err})
+        return res.json({status: 0, message: "Successfully moved"})
+    })
+})
+
+
+router.post("/accept", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    var id = req.body.pid;
+    var order = await Order.findById(id)
+    if (!order) return res.json({status: 1, error: "Order does not exist"})
+    var vendor = await User.findOne({email: req.user.email}).populate('orders')
+    if (!vendor) return res.json({status: 1, error: "User does not exist"})
+    console.log(vendor.orders)
+    if (vendor.orders.findIndex((p) => (p._id == id)) === -1) return res.json({status: 1, error: "Order does not exist"})
+
+    if (order.status !== 'PLACED') {
+        if (order.status === 'REJECTED') return res.json({status: 1, error: "Order already rejected"})
+        else return res.json({status: 1, error: "Order already accepted"})
+    }
+
+    var cnt = 0
+    for (let i in vendor.orders) {
+        var x = vendor.orders[i]
+        if (x.status === 'ACCEPTED' || x.status === 'COOKING')
+            cnt++;
+    }
+    if (cnt >= 10) {
+        return res.json({status: 1, error: "Cannot accept any more orders!"})
+    }
+
+    order.status = 'ACCEPTED'
+
+    order.save((err) => {
+        if (err) return res.json({status: 1, error: err})
+        return res.json({status: 0, message: "Successfully accepted"})
+    })
+})
+
+router.post("/reject", async (req, res) => {
+    if (!req.user || req.user.type !== "vendor") return res.json({status: 1, error: "Unauthorized"})
+    var id = req.body.pid;
+    var order = await Order.findById(id)
+    if (!order) return res.json({status: 1, error: "Order does not exist"})
+    var vendor = await User.findOne({email: req.user.email}).populate('orders')
+    if (!vendor) return res.json({status: 1, error: "User does not exist"})
+    if (vendor.orders.findIndex((p) => (p._id == id)) === -1) return res.json({status: 1, error: "Order does not exist"})
+
+    if (order.status !== 'PLACED') return res.json({status: 1, error: "Order already accepted"})
+
+    order.status = 'REJECTED'
+
+    order.save((err) => {
+        if (err) return res.json({status: 1, error: err})
+        return res.json({status: 0, message: "Successfully rejected"})
+    })
+})
+
+router.post("/rate", async (req, res) => {
+    if (!req.user || req.user.type !== "buyer") return res.json({status: 1, error: "Unauthorized"})
+    var id = req.body.pid;
+    var newRating = parseInt(req.body.rating)
+    var order = await Order.findById(id)
+    if (!order) return res.json({status: 1, error: "Order does not exist"})
+    var buyer = await User.findOne({email: req.user.email}).populate('orders')
+    if (!buyer) return res.json({status: 1, error: "User does not exist"})
+    if (buyer.orders.findIndex((p) => (p._id == id)) === -1) return res.json({status: 1, error: "Order does not exist"})
+
+    var product = await Product.findById(order.item.pid)
+    if (product) {
+        if (!order.rating) {
+            product.rating.count++
+            product.rating.total += newRating
+        }
+        else {
+            product.rating.total += newRating - parseInt(order.rating)
+        }
+        product.save(err => {
+            if (err) return res.json({status: 1, error: err.toString()})
+        })
+    }
+    order.rating = newRating
+    order.save((err) => {
+        if (err) return res.json({status: 1, error: err.toString()})
+        return res.json({status: 0, message: "Thank you for your feedback!"})
+    })
 })
 
 module.exports = router

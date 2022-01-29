@@ -3,8 +3,9 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Container } from "@mui/material";
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
-import {AxiosLogin} from "../../services/auth";
+import {AxiosGetUser, AxiosLogin} from "../../services/auth";
 import { message } from "antd";
+import {useEffect} from "react";
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -24,6 +25,13 @@ const LoginForm = () => {
         }
 
     };
+    useEffect(async () => {
+        var res = await AxiosGetUser();
+        if (res) {
+            message.warning("User already logged in")
+            navigate("/profile")
+        }
+    }, [navigate])
 
     return (
         <Container maxWidth={"sm"}>

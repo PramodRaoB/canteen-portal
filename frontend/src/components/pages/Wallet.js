@@ -30,6 +30,7 @@ const Wallet = (() => {
         }
         else {
             message.success(res.message);
+            navigate("/wallet")
         }
     }
 
