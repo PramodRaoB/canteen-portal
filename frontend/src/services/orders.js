@@ -1,6 +1,6 @@
 import axios from "axios"
 
-axios.defaults.url = "http://localhost:4000/api";
+axios.defaults.url = "/api";
 
 const AxiosPlaceOrder = async (val) => {
     var res = await axios.post("/order/new", val)

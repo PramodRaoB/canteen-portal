@@ -1,7 +1,7 @@
 import axios from "axios"
 import {AxiosGetUser} from "./auth";
 
-axios.defaults.url = "http://localhost:4000/api";
+axios.defaults.url = "/api";
 
 const AxiosGetProducts = async () => {
     const res = await AxiosGetUser();
